@@ -1,0 +1,4 @@
+streamlit==1.26.0       # Streamlit for the web app
+spotipy==2.23.0         # Spotipy for Spotify API integration
+pandas==1.5.3           # Pandas for data manipulation
+matplotlib==3.7.2       # Matplotlib for data visualization
