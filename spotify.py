@@ -4,10 +4,11 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 
-# Spotify app configuration
-SPOTIFY_CLIENT_ID     = "1dcbd7d4fafb480ab60d84c309ad5626"
+# Spotify app configuration (hardcoded for now)
+SPOTIFY_CLIENT_ID = "1dcbd7d4fafb480ab60d84c309ad5626"
 SPOTIFY_CLIENT_SECRET = "49a0cae0cf834b1f84d6ac1090cec485"
-SPOTIFY_REDIRECT_URI  = "http://localhost:8080"
+SPOTIFY_REDIRECT_URI = "http://localhost:8080"  # For local testing
+# Update to "https://streamlytics.streamlit.app" when deployed
 
 SPOTIFY_SCOPE = (
     "user-read-email user-read-private user-library-read user-library-modify "
@@ -27,7 +28,7 @@ def authenticate_spotify():
             client_secret=SPOTIFY_CLIENT_SECRET,
             redirect_uri=SPOTIFY_REDIRECT_URI,
             scope=SPOTIFY_SCOPE,
-            cache_path=".streamlit/spotify_oauth_cache"  # Cache tokens in a persistent file
+            cache_path=".streamlit/spotify_oauth_cache"  # Cache tokens locally
         )
         spotify = spotipy.Spotify(auth_manager=auth_manager)
         return spotify
