@@ -6,6 +6,17 @@ import streamlit as st
 
 from spotify import authenticate_spotify
 
+# Spotify app configuration (hardcoded for now)
+SPOTIFY_CLIENT_ID = "1dcbd7d4fafb480ab60d84c309ad5626"
+SPOTIFY_CLIENT_SECRET = "49a0cae0cf834b1f84d6ac1090cec485"
+SPOTIFY_REDIRECT_URI = "http://localhost:8080"  # For local testing
+SPOTIFY_SCOPE = (
+    "user-read-email user-read-private user-library-read user-library-modify "
+    "user-read-playback-state user-modify-playback-state user-read-currently-playing "
+    "playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public "
+    "user-read-recently-played user-top-read user-follow-read user-follow-modify"
+)
+
 # Set up Streamlit page configuration
 st.set_page_config(page_title="Streamlytics", layout="wide")
 
@@ -47,16 +58,18 @@ def main():
 
     # Login Button
     if st.button("Log in to Spotify"):
-        # Redirect to Spotify's login page
-        auth_manager = SpotifyOAuth(
-            client_id=st.secrets["spotify"]["client_id"],
-            client_secret=st.secrets["spotify"]["client_secret"],
-            redirect_uri=st.secrets["spotify"]["redirect_url"],
-            scope=st.secrets["spotify"]["scope"],
-            show_dialog=True  # Ensures the login dialog always appears
-        )
-        auth_url = auth_manager.get_authorize_url()
-        st.write(f"[Click here to log in to Spotify]({auth_url})", unsafe_allow_html=True)
+        try:
+            auth_manager = SpotifyOAuth(
+                client_id=SPOTIFY_CLIENT_ID,
+                client_secret=SPOTIFY_CLIENT_SECRET,
+                redirect_uri=SPOTIFY_REDIRECT_URI,
+                scope=SPOTIFY_SCOPE,
+                show_dialog=True  # Ensures the login dialog always appears
+            )
+            auth_url = auth_manager.get_authorize_url()
+            st.markdown(f"[Click here to log in to Spotify]({auth_url})", unsafe_allow_html=True)
+        except Exception as e:
+            st.error(f"Error generating Spotify login link: {e}")
 
     # Check if logged in
     if st.session_state.spotify_client:
