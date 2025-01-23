@@ -1,6 +1,6 @@
 # app.py
 
-#import openai
+
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
