@@ -1,7 +1,5 @@
 # app.py
-
 # app.py
-
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -9,6 +7,7 @@ import streamlit as st
 
 from spotify import authenticate_spotify
 
+# Set up Streamlit page configuration
 st.set_page_config(page_title="Streamlytics", layout="wide")
 
 # Initialize session state for Spotify
@@ -49,7 +48,12 @@ def main():
 
     # Login Button
     if st.button("Log in to Spotify"):
-        st.session_state.spotify_client = authenticate_spotify()
+        spotify_client = authenticate_spotify()
+        if spotify_client:
+            st.session_state.spotify_client = spotify_client
+            st.success("You are logged in! Navigate to the Analytics Page for insights.")
+        else:
+            st.error("Spotify login failed. Please try again.")
 
     # Check if logged in
     if st.session_state.spotify_client:
