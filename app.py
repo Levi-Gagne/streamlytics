@@ -1,5 +1,4 @@
 # app.py
-# app.py
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -32,7 +31,7 @@ def main():
         <div style="background-color: rgb(32, 32, 32); padding: 15px; border-radius: 10px;">
             <h3 style="color: white;">About the App</h3>
             <p style="color: white;">Streamlytics provides detailed insights into your Spotify activity, including playlists, songs, and listening history.</p>
-            <h4 style="color: white;">Table of Contents</h4>
+            <h4 style="color: white;">Features</h4>
             <ul style="color: white;">
                 <li>Log in to Spotify</li>
                 <li>Explore your playlists</li>
@@ -48,12 +47,16 @@ def main():
 
     # Login Button
     if st.button("Log in to Spotify"):
-        spotify_client = authenticate_spotify()
-        if spotify_client:
-            st.session_state.spotify_client = spotify_client
-            st.success("You are logged in! Navigate to the Analytics Page for insights.")
-        else:
-            st.error("Spotify login failed. Please try again.")
+        # Redirect to Spotify's login page
+        auth_manager = SpotifyOAuth(
+            client_id=st.secrets["spotify"]["client_id"],
+            client_secret=st.secrets["spotify"]["client_secret"],
+            redirect_uri=st.secrets["spotify"]["redirect_url"],
+            scope=st.secrets["spotify"]["scope"],
+            show_dialog=True  # Ensures the login dialog always appears
+        )
+        auth_url = auth_manager.get_authorize_url()
+        st.write(f"[Click here to log in to Spotify]({auth_url})", unsafe_allow_html=True)
 
     # Check if logged in
     if st.session_state.spotify_client:
