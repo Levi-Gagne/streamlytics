@@ -1,21 +1,15 @@
 # app.py
 
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
-
 from spotify import authenticate_spotify
 
-# Spotify app configuration (hardcoded for now)
-SPOTIFY_CLIENT_ID = "1dcbd7d4fafb480ab60d84c309ad5626"
-SPOTIFY_CLIENT_SECRET = "49a0cae0cf834b1f84d6ac1090cec485"
-SPOTIFY_REDIRECT_URI = "https://streamlytics.streamlit.app"  # For local testing
-SPOTIFY_SCOPE = (
-    "user-read-email user-read-private user-library-read user-library-modify "
-    "user-read-playback-state user-modify-playback-state user-read-currently-playing "
-    "playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public "
-    "user-read-recently-played user-top-read user-follow-read user-follow-modify"
-)
+# Define green shades
+green_shades = [
+    "rgb(98, 201, 106)",    # Color 1
+    "rgb(120, 216, 130)",   # Color 2
+    "rgb(142, 231, 154)",   # Color 3
+    "rgb(165, 241, 178)"    # Color 4
+]
 
 # Set up Streamlit page configuration
 st.set_page_config(page_title="Streamlytics", layout="wide")
@@ -26,50 +20,96 @@ if "spotify_client" not in st.session_state:
 
 # Main App
 def main():
-    # Title with grey box and color
+    # Apply global styles to set the page background to black
     st.markdown(
         """
-        <div style="background-color: rgb(32, 32, 32); padding: 20px; border-radius: 10px; text-align: center;">
-            <h1 style="color: #4CAF50;">Streamlytics</h1>
+        <style>
+        /* Set the entire page background to black */
+        body {
+            background-color: rgb(0, 0, 0);
+        }
+        /* Optional: Adjust the main container's padding */
+        .css-18e3th9 {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Title with grey box and Color 1, including bottom margin for spacing
+    st.markdown(
+        f"""
+        <div style="
+            background-color: rgb(32, 32, 32); 
+            padding: 20px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: 20px;">
+            <h1 style="color: {green_shades[0]};">Streamlytics</h1>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # Description box with app overview and table of contents
+    # Description box with app overview using Color 2, including bottom margin for spacing
     st.markdown(
-        """
-        <div style="background-color: rgb(32, 32, 32); padding: 15px; border-radius: 10px;">
-            <h3 style="color: white;">About the App</h3>
-            <p style="color: white;">Streamlytics provides detailed insights into your Spotify activity, including playlists, songs, and listening history.</p>
-            <h4 style="color: white;">Features</h4>
+        f"""
+        <div style="
+            background-color: rgb(32, 32, 32); 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 20px;">
+            <h3 style="color: {green_shades[1]};">About the App</h3>
+            <p style="color: white;">
+                Streamlytics provides detailed insights into your Spotify activity, including playlists, songs, and listening history.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Features box with features list and descriptions using Color 3 and Color 4
+    st.markdown(
+        f"""
+        <div style="
+            background-color: rgb(32, 32, 32); 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 20px;">
+            <h4 style="color: {green_shades[2]};">Features</h4>
             <ul style="color: white;">
-                <li>Log in to Spotify</li>
-                <li>Explore your playlists</li>
-                <li>View recently played tracks</li>
-                <li>Download data for analysis</li>
+                <li>
+                    <strong style="color: {green_shades[3]};">Log in to Spotify</strong>: 
+                    Securely authenticate your Spotify account to access your personal data.
+                </li>
+                <li>
+                    <strong style="color: {green_shades[3]};">Explore Your Playlists</strong>: 
+                    View and analyze all your Spotify playlists, including track details and statistics.
+                </li>
+                <li>
+                    <strong style="color: {green_shades[3]};">View Recently Played Tracks</strong>: 
+                    Keep track of the latest songs you've listened to with detailed playback information.
+                </li>
+                <li>
+                    <strong style="color: {green_shades[3]};">Download Data for Analysis</strong>: 
+                    Export your Spotify data in CSV format for offline analysis and insights.
+                </li>
             </ul>
         </div>
         """,
         unsafe_allow_html=True
     )
 
+    # Add vertical space between the description and the button
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
     st.write("Click the button below to log in to Spotify and start exploring your analytics.")
 
     # Login Button
     if st.button("Log in to Spotify"):
-        try:
-            auth_manager = SpotifyOAuth(
-                client_id=SPOTIFY_CLIENT_ID,
-                client_secret=SPOTIFY_CLIENT_SECRET,
-                redirect_uri=SPOTIFY_REDIRECT_URI,
-                scope=SPOTIFY_SCOPE,
-                show_dialog=True  # Ensures the login dialog always appears
-            )
-            auth_url = auth_manager.get_authorize_url()
-            st.markdown(f"[Click here to log in to Spotify]({auth_url})", unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"Error generating Spotify login link: {e}")
+        st.session_state.spotify_client = authenticate_spotify()
 
     # Check if logged in
     if st.session_state.spotify_client:
