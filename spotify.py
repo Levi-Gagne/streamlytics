@@ -4,12 +4,10 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 
-# Spotify app configuration (hardcoded for now)
+# Spotify app configuration
 SPOTIFY_CLIENT_ID = "1dcbd7d4fafb480ab60d84c309ad5626"
 SPOTIFY_CLIENT_SECRET = "49a0cae0cf834b1f84d6ac1090cec485"
-SPOTIFY_REDIRECT_URI = "http://localhost:8080"  # For local testing
-# Update to "https://streamlytics.streamlit.app" when deployed
-
+SPOTIFY_REDIRECT_URI = "http://streamlytics.streamlit.app"  # Using the redirect URL that works
 SPOTIFY_SCOPE = (
     "user-read-email user-read-private user-library-read user-library-modify "
     "user-read-playback-state user-modify-playback-state user-read-currently-playing "
@@ -20,18 +18,30 @@ SPOTIFY_SCOPE = (
 def authenticate_spotify():
     """
     Authenticates the user with Spotify and returns a Spotipy client instance.
-    Handles token caching and session management for Streamlit Cloud.
     """
     try:
+        # Initialize the SpotifyOAuth object
         auth_manager = SpotifyOAuth(
             client_id=SPOTIFY_CLIENT_ID,
             client_secret=SPOTIFY_CLIENT_SECRET,
             redirect_uri=SPOTIFY_REDIRECT_URI,
-            scope=SPOTIFY_SCOPE,
-            cache_path=".streamlit/spotify_oauth_cache"  # Cache tokens locally
+            scope=SPOTIFY_SCOPE
         )
+
+        # Create the Spotify client with the authentication manager
         spotify = spotipy.Spotify(auth_manager=auth_manager)
+
+        # Test the connection by fetching the current user's profile
+        user = spotify.current_user()
+        st.success(f"Connection successful! Logged in as {user['display_name']}")
+        st.write(f"Email: {user.get('email', 'N/A')}")
+        st.write(f"Country: {user['country']}")
+        st.write(f"Subscription: {user['product']}")
+        
         return spotify
+    except spotipy.exceptions.SpotifyException as e:
+        st.error(f"Spotify API error: {e}")
+        return None
     except Exception as e:
-        st.error(f"Authentication failed: {e}")
+        st.error(f"Failed to connect: {e}")
         return None
