@@ -6,6 +6,8 @@ A **Streamlit** web application that enables users to **fetch, analyze, and visu
 - Generate posters from album cover art.
 - Authenticate and interact with Spotify.
 
+Additionally, the app includes **analytics, playback tracking, and cover art visualization**.
+
 ---
 
 ## 📌 Features
@@ -15,6 +17,8 @@ A **Streamlit** web application that enables users to **fetch, analyze, and visu
 ✔ **Cover Art Download** - Saves high-quality cover art for the Billboard songs.  
 ✔ **Poster Creation** - Generates beautiful collages and posters from the collected cover art.  
 ✔ **Spotify Authentication** - Allows users to connect their Spotify account.  
+✔ **Analytics & Trends** - Provides **detailed insights into playback history, downloads, and streaming statistics**.  
+✔ **Playlist Cover Art** - Generates and customizes cover images using Spotify album covers.  
 ✔ **Interactive UI** - Built with **Streamlit** for an easy-to-use interface.  
 
 ---
@@ -63,36 +67,44 @@ streamlit run streamlytics/pages/4_Billboard_100.py
 ```
 streamlytics/
 │-- pages/
-│   ├── 4_Billboard_100.py    # Main Billboard App Page
-│   ├── 6_Top_Tracks_Cover_Art.py  # Additional Cover Art Page
-│-- data/                     # Contains Billboard Parquet files
-│-- json/                     # Stores JSON outputs
-│-- fonts/                    # Font files for posters
-│-- coverArt.py               # Handles fetching Billboard data
-│-- spotify_cover_art.py       # Manages Spotify authentication and cover art retrieval
-│-- image_processing.py        # Processes images, creates posters
-│-- utils.py                   # Utility functions
-│-- requirements.txt           # Python dependencies
-│-- README.md                  # This file
+│   ├── 1_Analytics.py            # Analytics dashboard
+│   ├── 2_Playback.py             # Playback tracking and insights
+│   ├── 3_Download_Statistics.py   # Download statistics visualization
+│   ├── 4_Billboard_100.py        # Billboard Top 100 fetching and enrichment
+│   ├── 5_Playlist_Cover_Art.py   # Playlist cover art generator
+│   ├── 6_Top_Tracks_Cover_Art.py # Top track cover art visualization
+│-- data/                         # Contains Billboard Parquet files
+│-- json/                         # Stores JSON outputs
+│-- fonts/                        # Font files for posters
+│-- coverArt.py                   # Handles fetching Billboard data
+│-- spotify_cover_art.py          # Manages Spotify authentication and cover art retrieval
+│-- image_processing.py           # Processes images, creates posters
+│-- utils.py                      # Utility functions
+│-- requirements.txt              # Python dependencies
+│-- README.md                     # This file
 ```
 
 ---
 
-## 🎨 Usage
+## 🎨 Page Descriptions
 
-### **Fetching Billboard Data**
-1. Select a **week** from the dropdown menu.
-2. Click **Fetch & Enrich Billboard Playlist**.
-3. The app will save a JSON file containing the Billboard chart data.
+### 📊 **1_Analytics.py**  
+_Provides analytics and insights on streaming data, visualizing trends, and usage patterns._
 
-### **Downloading Cover Art**
-1. Click **Download Cover Art from JSON**.
-2. This saves album covers in the `data/cover_art/` folder.
+### 🎶 **2_Playback.py**  
+_Manages playback statistics, allowing users to analyze their listening history._
 
-### **Generating a Poster**
-1. Choose a **folder** with cover art.
-2. Select a **font** and **background color**.
-3. Click **Create Billboard Poster** to generate a collage.
+### 📥 **3_Download_Statistics.py**  
+_Displays download statistics for various songs and albums, showing trends over time._
+
+### 🎼 **4_Billboard_100.py**  
+_Fetches and enriches Billboard Top 100 chart data, allowing users to view rankings and create posters._
+
+### 🎨 **5_Playlist_Cover_Art.py**  
+_Generates and customizes cover art for playlists using album images and user preferences._
+
+### 🖼 **6_Top_Tracks_Cover_Art.py**  
+_Creates collages and visualizations using the top tracks' cover art._
 
 ---
 
