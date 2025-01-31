@@ -7,7 +7,7 @@ import streamlit as st
 # Spotify app configuration
 SPOTIFY_CLIENT_ID = "1dcbd7d4fafb480ab60d84c309ad5626"
 SPOTIFY_CLIENT_SECRET = "49a0cae0cf834b1f84d6ac1090cec485"
-SPOTIFY_REDIRECT_URI = "http://localhost:8080"  # Using the redirect URL that works
+SPOTIFY_REDIRECT_URI = "https://streamlytics.streamlit.app"  # Using the redirect URL that works
 SPOTIFY_SCOPE = (
     "user-read-email user-read-private user-library-read user-library-modify "
     "user-read-playback-state user-modify-playback-state user-read-currently-playing "
