@@ -5,8 +5,8 @@ from spotipy.oauth2 import SpotifyOAuth
 import streamlit as st
 
 # Spotify app configuration
-SPOTIFY_CLIENT_ID = "1dcbd7d4fafb480ab60d84c309ad5626"
-SPOTIFY_CLIENT_SECRET = "49a0cae0cf834b1f84d6ac1090cec485"
+SPOTIFY_CLIENT_ID = ""
+SPOTIFY_CLIENT_SECRET = ""
 SPOTIFY_REDIRECT_URI = "https://streamlytics.streamlit.app"  # Using the redirect URL that works
 SPOTIFY_SCOPE = (
     "user-read-email user-read-private user-library-read user-library-modify "
