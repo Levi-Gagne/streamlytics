@@ -1,7 +1,7 @@
 # app.py
 
 import streamlit as st
-from spotify import authenticate_spotify
+from spotify import get_spotify_client
 
 # Define green shades
 green_shades = [
@@ -17,6 +17,10 @@ st.set_page_config(page_title="Streamlytics", layout="wide")
 # Initialize session state for Spotify
 if "spotify_client" not in st.session_state:
     st.session_state.spotify_client = None
+
+if "spotify_auth_started" not in st.session_state:
+    st.session_state.spotify_auth_started = False
+
 
 def main():
     # Apply global styles to set the page background to black
@@ -54,9 +58,13 @@ def main():
     
     st.write("Click the button below to log in to Spotify and start exploring your analytics.")
 
-    # Login Button
+    # Login Button -> just flips a flag, real work happens below
     if st.button("Log in to Spotify"):
-        st.session_state.spotify_client = authenticate_spotify()
+        st.session_state.spotify_auth_started = True
+
+    # Once auth is started, try to obtain a Spotify client
+    if st.session_state.spotify_auth_started and st.session_state.spotify_client is None:
+        st.session_state.spotify_client = get_spotify_client()
 
     # Check if logged in
     if st.session_state.spotify_client:
@@ -134,6 +142,7 @@ def main():
 
     # Add vertical space
     st.markdown("<br><br>", unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
