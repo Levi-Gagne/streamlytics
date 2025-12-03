@@ -4,6 +4,7 @@ import os
 import json
 import streamlit as st
 
+from spotify import get_spotify_client
 from spotify_cover_art import save_image
 from image_processing import (
     list_available_fonts,
@@ -25,12 +26,12 @@ colors = {
 }
 # ---------------------------------------------------------------
 
-# Ensure the main directory exists for saving JSON files
-DATA_FOLDER = "json/"            # Save in the json directory
-os.makedirs(DATA_FOLDER, exist_ok=True)
-
+DATA_FOLDER = "json/"              # Save playlist JSON here
 COVER_ART_FOLDER = "data/cover_art/"  # Folder for saving cover art images
-FONTS_FOLDER = "fonts"               # Folder for font files
+FONTS_FOLDER = "fonts"             # Folder for font files
+
+os.makedirs(DATA_FOLDER, exist_ok=True)
+os.makedirs(COVER_ART_FOLDER, exist_ok=True)
 
 
 def fetch_user_playlists(sp):
@@ -110,16 +111,8 @@ def download_images_from_json(json_path, playlist_name):
 
 
 def main():
-    # Require global Spotify client from home page
-    if "spotify_client" not in st.session_state or st.session_state.spotify_client is None:
-        st.error("Please log in to Spotify from the Home page before using this feature.")
-        return
-
-    sp = st.session_state.spotify_client
-
-    # Ensure JSON directory exists for all steps
-    os.makedirs(DATA_FOLDER, exist_ok=True)
-    os.makedirs(COVER_ART_FOLDER, exist_ok=True)
+    # Get a fresh / refreshed Spotify client for this session
+    sp = get_spotify_client()
 
     # Main page header
     st.markdown(
@@ -205,7 +198,9 @@ def main():
     download_option = st.radio("Download the Poster?", ("No", "Yes"), index=0)
 
     if st.button("Generate Ultra High-Res Poster"):
-        output_poster_path = os.path.join(folder_path, f"{custom_text.replace(' ', '_')}_poster.jpg")
+        output_poster_path = os.path.join(
+            folder_path, f"{custom_text.replace(' ', '_')}_poster.jpg"
+        )
         try:
             poster = create_ultra_high_res_poster(
                 folder_path=folder_path,
@@ -255,7 +250,7 @@ def main():
         st.warning("No Spotify cover art albums found. Please download cover art first.")
         return
 
-    selected_spotify_folder = st.selectbox("", spotify_folders)
+    selected_spotify_folder = st.selectbox("Cover Art Album", spotify_folders)
     spotify_folder_path = os.path.join(COVER_ART_FOLDER, selected_spotify_folder)
 
     # 4.2: Select a Font for Spotify Poster
@@ -264,7 +259,7 @@ def main():
         unsafe_allow_html=True,
     )
     try:
-        selected_spotify_font_name = st.selectbox("", font_names)
+        selected_spotify_font_name = st.selectbox("Spotify Poster Font", font_names)
         spotify_font_path = available_fonts[font_names.index(selected_spotify_font_name)]
     except ValueError as e:
         st.error(str(e))
@@ -275,14 +270,20 @@ def main():
         f"<p style='color: {colors['header3']}; font-weight:bold; margin:0;'>Enter Title and Subtitle for Spotify Poster</p>",
         unsafe_allow_html=True,
     )
-    spotify_main_title = st.text_input("", value="Spotify Playlist Poster")
-    spotify_subtitle = st.text_input("", value=f"Generated from {selected_playlist}")
+    spotify_main_title = st.text_input("Poster Title", value="Spotify Playlist Poster")
+    spotify_subtitle = st.text_input(
+        "Poster Subtitle", value=f"Generated from {selected_playlist}"
+    )
 
     # 4.4: Background Color
-    spotify_background_color = st.color_picker("", value="#C8B4FF")
+    spotify_background_color = st.color_picker(
+        "Spotify Poster Background", value="#C8B4FF"
+    )
 
     # 4.5: Download Spotify Poster Option
-    spotify_download_option = st.radio("", ("No", "Yes"), index=0)
+    spotify_download_option = st.radio(
+        "Download Spotify Poster?", ("No", "Yes"), index=0
+    )
 
     # 4.6: Image Effects Selection
     st.markdown(
@@ -323,7 +324,11 @@ def main():
             )
 
             st.success(f"Spotify Poster created successfully: {spotify_output_poster_path}")
-            st.image(spotify_output_poster_path, caption="Generated Spotify Poster", use_column_width=True)
+            st.image(
+                spotify_output_poster_path,
+                caption="Generated Spotify Poster",
+                use_column_width=True,
+            )
 
             if spotify_download_option == "Yes":
                 with open(spotify_output_poster_path, "rb") as file:
@@ -338,7 +343,7 @@ def main():
             st.error(f"Error creating Spotify poster: {e}")
 
     st.markdown("---")
-
+    
     # 5: Download Album Collage Only
     st.markdown(
         f"<h2 style='color: {colors['header2']}'>5. Download Album Collage Only</h2>",
@@ -355,7 +360,7 @@ def main():
         return
 
     selected_collage_folder = st.selectbox(
-        "Select Album Art Folder", spotify_folders, key="collage"
+        "Select Album Art Folder for Collage", spotify_folders, key="collage"
     )
     collage_folder_path = os.path.join(COVER_ART_FOLDER, selected_collage_folder)
 
@@ -366,7 +371,11 @@ def main():
         try:
             generate_album_collage(collage_folder_path, collage_output_path)
             st.success(f"Album Collage created successfully: {collage_output_path}")
-            st.image(collage_output_path, caption="Generated Album Collage", use_column_width=True)
+            st.image(
+                collage_output_path,
+                caption="Generated Album Collage",
+                use_column_width=True,
+            )
             with open(collage_output_path, "rb") as file:
                 st.download_button(
                     "Download Collage",
