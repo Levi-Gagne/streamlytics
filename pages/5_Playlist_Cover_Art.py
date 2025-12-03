@@ -1,12 +1,16 @@
-# streamlytics/pages/5_cover_art.py
+# streamlytics/pages/5_Playlist_Cover_Art.py
 
 import os
 import json
 import streamlit as st
-from spotify import authenticate_spotify  # Spotify authentication handled elsewhere
-from spotify_cover_art import save_image
-from image_processing import list_available_fonts, create_ultra_high_res_poster, generate_billboard_poster, generate_album_collage
 
+from spotify_cover_art import save_image
+from image_processing import (
+    list_available_fonts,
+    create_ultra_high_res_poster,
+    generate_billboard_poster,
+    generate_album_collage,
+)
 
 # ---------------------------------------------------------------
 # Define a color dictionary for quick reference
@@ -22,10 +26,11 @@ colors = {
 # ---------------------------------------------------------------
 
 # Ensure the main directory exists for saving JSON files
-DATA_FOLDER = "json/"  # Save in the json directory
-os.makedirs(DATA_FOLDER, exist_ok=True)  # Ensure the directory exists
+DATA_FOLDER = "json/"            # Save in the json directory
+os.makedirs(DATA_FOLDER, exist_ok=True)
+
 COVER_ART_FOLDER = "data/cover_art/"  # Folder for saving cover art images
-FONTS_FOLDER = "fonts"  # Folder for font files
+FONTS_FOLDER = "fonts"               # Folder for font files
 
 
 def fetch_user_playlists(sp):
@@ -33,7 +38,7 @@ def fetch_user_playlists(sp):
     Fetches the user's playlists and returns a dictionary with playlist names and their IDs.
     """
     playlists = sp.current_user_playlists(limit=50)
-    playlist_dict = {item['name']: item['id'] for item in playlists['items']}
+    playlist_dict = {item["name"]: item["id"] for item in playlists["items"]}
     return playlist_dict
 
 
@@ -44,26 +49,28 @@ def fetch_playlist_tracks(sp, playlist_id):
     playlist_tracks = []
     results = sp.playlist_tracks(
         playlist_id,
-        fields="items(track(name,artists(name),album(name,release_date,images),duration_ms,explicit,popularity,external_urls(spotify)))"
+        fields=(
+            "items(track(name,artists(name),album(name,release_date,images),"
+            "duration_ms,explicit,popularity,external_urls(spotify)))"
+        ),
     )
-    for item in results['items']:
-        track = item['track']
-        album_images = track['album']['images']
-        # Choose the largest image if available
-        largest_image_url = album_images[0]['url'] if album_images else None
+    for item in results["items"]:
+        track = item["track"]
+        album_images = track["album"]["images"]
+        largest_image_url = album_images[0]["url"] if album_images else None
 
         track_info = {
-            "name": track['name'],
-            "artists": [artist['name'] for artist in track['artists']],
+            "name": track["name"],
+            "artists": [artist["name"] for artist in track["artists"]],
             "album": {
-                "name": track['album']['name'],
-                "release_date": track['album']['release_date'],
+                "name": track["album"]["name"],
+                "release_date": track["album"]["release_date"],
                 "image_url": largest_image_url,
             },
-            "duration_ms": track['duration_ms'],
-            "explicit": track['explicit'],
-            "popularity": track['popularity'],
-            "track_url": track['external_urls']['spotify']
+            "duration_ms": track["duration_ms"],
+            "explicit": track["explicit"],
+            "popularity": track["popularity"],
+            "track_url": track["external_urls"]["spotify"],
         }
         playlist_tracks.append(track_info)
     return playlist_tracks
@@ -84,13 +91,11 @@ def download_images_from_json(json_path, playlist_name):
     Downloads album images based on track data in the given JSON file.
     Saves images in the folder: `data/cover_art/{playlist_name}`.
     """
-    json_path = os.path.join(DATA_FOLDER, os.path.basename(json_path))  # Ensure correct JSON path
+    json_path = os.path.join(DATA_FOLDER, os.path.basename(json_path))
 
-    # Ensure folder exists for the playlist
     playlist_folder = os.path.join(COVER_ART_FOLDER, playlist_name.replace(" ", "_"))
     os.makedirs(playlist_folder, exist_ok=True)
 
-    # Read the JSON data
     with open(json_path, "r") as f:
         tracks = json.load(f)
 
@@ -98,34 +103,36 @@ def download_images_from_json(json_path, playlist_name):
         album = track.get("album", {})
         image_url = album.get("image_url")
         if image_url:
-            # Construct the filename
             filename = f"{track['artists'][0]} - {album['name']}.jpg".replace("/", "-")
             save_image(image_url, playlist_folder, filename)
 
     st.success(f"Album images saved to {playlist_folder}")
 
 
-
 def main():
-    # Ensure Spotify is authenticated
+    # Require global Spotify client from home page
     if "spotify_client" not in st.session_state or st.session_state.spotify_client is None:
-        st.error("Please log in to Spotify from the home page.")
+        st.error("Please log in to Spotify from the Home page before using this feature.")
         return
 
     sp = st.session_state.spotify_client
 
     # Ensure JSON directory exists for all steps
     os.makedirs(DATA_FOLDER, exist_ok=True)
+    os.makedirs(COVER_ART_FOLDER, exist_ok=True)
 
     # Main page header
     st.markdown(
         f"<h1 style='text-align: center; color: {colors['header1']};'>Create a Poster from Album Art</h1>",
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
     st.markdown("---")
 
     # 1. Pull Playlist Information
-    st.markdown(f"<h2 style='color: {colors['header2']}'>1. Pull Playlist Information</h2>", unsafe_allow_html=True)
+    st.markdown(
+        f"<h2 style='color: {colors['header2']}'>1. Pull Playlist Information</h2>",
+        unsafe_allow_html=True,
+    )
     playlists = fetch_user_playlists(sp)
 
     if not playlists:
@@ -151,9 +158,12 @@ def main():
         st.markdown("---")
 
         # 2. Download Playlist Cover Art
-        st.markdown(f"<h2 style='color: {colors['header2']}'>2. Download Playlist Cover Art</h2>", unsafe_allow_html=True)
+        st.markdown(
+            f"<h2 style='color: {colors['header2']}'>2. Download Playlist Cover Art</h2>",
+            unsafe_allow_html=True,
+        )
         json_filename = f"{selected_playlist.replace(' ', '_').lower()}_tracks.json"
-        json_path = os.path.join(DATA_FOLDER, json_filename)  # Fix: Ensure it looks in json directory
+        json_path = os.path.join(DATA_FOLDER, json_filename)
 
         if os.path.exists(json_path):
             if st.button("Download Images"):
@@ -162,8 +172,15 @@ def main():
     st.markdown("---")
 
     # 3. Create Poster from Cover Art
-    st.markdown(f"<h2 style='color: {colors['header2']}'>3. Create Poster from Cover Art</h2>", unsafe_allow_html=True)
-    folders = [folder for folder in os.listdir(COVER_ART_FOLDER) if os.path.isdir(os.path.join(COVER_ART_FOLDER, folder))]
+    st.markdown(
+        f"<h2 style='color: {colors['header2']}'>3. Create Poster from Cover Art</h2>",
+        unsafe_allow_html=True,
+    )
+    folders = [
+        folder
+        for folder in os.listdir(COVER_ART_FOLDER)
+        if os.path.isdir(os.path.join(COVER_ART_FOLDER, folder))
+    ]
 
     if not folders:
         st.warning("No album art folders found. Download images first.")
@@ -198,30 +215,39 @@ def main():
                 font_size=1500,
                 padding=500,
                 max_canvas_size=15000,
-                background_color=background_color
+                background_color=background_color,
             )
             st.success(f"Poster created successfully: {output_poster_path}")
             st.image(poster, caption="Generated Poster", use_container_width=True)
 
             if download_option == "Yes":
                 with open(output_poster_path, "rb") as file:
-                    st.download_button("Download Poster", data=file, file_name=os.path.basename(output_poster_path), mime="image/jpeg")
+                    st.download_button(
+                        "Download Poster",
+                        data=file,
+                        file_name=os.path.basename(output_poster_path),
+                        mime="image/jpeg",
+                    )
 
         except Exception as e:
             st.error(f"Error creating poster: {e}")
 
     st.markdown("---")
 
-    # **Step 4: Create Spotify Poster**
-    st.markdown(f"<h2 style='color: {colors['header2']}'>4. Create Spotify Poster</h2>", unsafe_allow_html=True)
+    # 4. Create Spotify Poster
+    st.markdown(
+        f"<h2 style='color: {colors['header2']}'>4. Create Spotify Poster</h2>",
+        unsafe_allow_html=True,
+    )
 
-    # Step 4.1: Select a Spotify Cover Art Album
+    # 4.1: Select a Spotify Cover Art Album
     st.markdown(
         f"<p style='color: {colors['header3']}; font-weight:bold; margin:0;'>Select Spotify Cover Art Album</p>",
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
     spotify_folders = [
-        folder for folder in os.listdir(COVER_ART_FOLDER)
+        folder
+        for folder in os.listdir(COVER_ART_FOLDER)
         if os.path.isdir(os.path.join(COVER_ART_FOLDER, folder))
     ]
 
@@ -232,10 +258,10 @@ def main():
     selected_spotify_folder = st.selectbox("", spotify_folders)
     spotify_folder_path = os.path.join(COVER_ART_FOLDER, selected_spotify_folder)
 
-    # Step 4.2: Select a Font for Spotify Poster
+    # 4.2: Select a Font for Spotify Poster
     st.markdown(
         f"<p style='color: {colors['header3']}; font-weight:bold; margin:0;'>Select a Font for Spotify Poster</p>",
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
     try:
         selected_spotify_font_name = st.selectbox("", font_names)
@@ -244,34 +270,42 @@ def main():
         st.error(str(e))
         return
 
-    # Step 4.3: Enter Spotify Poster Title and Subtitle
+    # 4.3: Enter Spotify Poster Title and Subtitle
     st.markdown(
         f"<p style='color: {colors['header3']}; font-weight:bold; margin:0;'>Enter Title and Subtitle for Spotify Poster</p>",
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
     spotify_main_title = st.text_input("", value="Spotify Playlist Poster")
     spotify_subtitle = st.text_input("", value=f"Generated from {selected_playlist}")
 
-    # Step 4.4: Select Background Color for Spotify Poster
+    # 4.4: Background Color
     spotify_background_color = st.color_picker("", value="#C8B4FF")
 
-    # Step 4.5: Download Spotify Poster Option
+    # 4.5: Download Spotify Poster Option
     spotify_download_option = st.radio("", ("No", "Yes"), index=0)
 
-    # Step 4.6: Image Effects Selection
+    # 4.6: Image Effects Selection
     st.markdown(
         f"<p style='color: {colors['header3']}; font-weight:bold; margin:0;'>Select Image Effect for Spotify Poster</p>",
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
     image_effect = st.radio(
         "Select an effect to apply to the album art:",
         ("None", "Beveled Edges", "Rounded Corners"),
-        index=0
+        index=0,
     )
-    bevel_width = st.slider("Bevel Width", min_value=1, max_value=20, value=10) if image_effect == "Beveled Edges" else None
-    corner_radius = st.slider("Corner Radius", min_value=5, max_value=100, value=30) if image_effect == "Rounded Corners" else None
+    bevel_width = (
+        st.slider("Bevel Width", min_value=1, max_value=20, value=10)
+        if image_effect == "Beveled Edges"
+        else None
+    )
+    corner_radius = (
+        st.slider("Corner Radius", min_value=5, max_value=100, value=30)
+        if image_effect == "Rounded Corners"
+        else None
+    )
 
-    # Step 4.7: Generate Spotify Poster Button
+    # 4.7: Generate Spotify Poster Button
     if st.button("Generate Spotify Poster"):
         spotify_output_poster_path = f"poster_{selected_spotify_folder}.jpg"
 
@@ -285,7 +319,7 @@ def main():
                 background_color=spotify_background_color,
                 image_effect=image_effect,
                 bevel_width=bevel_width if bevel_width else 10,
-                corner_radius=corner_radius if corner_radius else 30
+                corner_radius=corner_radius if corner_radius else 30,
             )
 
             st.success(f"Spotify Poster created successfully: {spotify_output_poster_path}")
@@ -297,35 +331,52 @@ def main():
                         label="Download Spotify Poster",
                         data=file,
                         file_name=os.path.basename(spotify_output_poster_path),
-                        mime="image/jpeg"
+                        mime="image/jpeg",
                     )
 
         except Exception as e:
             st.error(f"Error creating Spotify poster: {e}")
 
     st.markdown("---")
-    
-    # Step 5: Download Album Collage Only (New Section)
-    st.markdown(f"<h2 style='color: {colors['header2']}'>5. Download Album Collage Only</h2>", unsafe_allow_html=True)
 
-    spotify_folders = [folder for folder in os.listdir(COVER_ART_FOLDER) if os.path.isdir(os.path.join(COVER_ART_FOLDER, folder))]
+    # 5: Download Album Collage Only
+    st.markdown(
+        f"<h2 style='color: {colors['header2']}'>5. Download Album Collage Only</h2>",
+        unsafe_allow_html=True,
+    )
+
+    spotify_folders = [
+        folder
+        for folder in os.listdir(COVER_ART_FOLDER)
+        if os.path.isdir(os.path.join(COVER_ART_FOLDER, folder))
+    ]
     if not spotify_folders:
         st.warning("No album art folders found. Please download cover art first.")
         return
 
-    selected_collage_folder = st.selectbox("Select Album Art Folder", spotify_folders, key="collage")
+    selected_collage_folder = st.selectbox(
+        "Select Album Art Folder", spotify_folders, key="collage"
+    )
     collage_folder_path = os.path.join(COVER_ART_FOLDER, selected_collage_folder)
 
     if st.button("Generate Album Collage"):
-        collage_output_path = os.path.join(collage_folder_path, f"{selected_collage_folder}_collage.jpg")
+        collage_output_path = os.path.join(
+            collage_folder_path, f"{selected_collage_folder}_collage.jpg"
+        )
         try:
             generate_album_collage(collage_folder_path, collage_output_path)
             st.success(f"Album Collage created successfully: {collage_output_path}")
             st.image(collage_output_path, caption="Generated Album Collage", use_column_width=True)
             with open(collage_output_path, "rb") as file:
-                st.download_button("Download Collage", data=file, file_name=os.path.basename(collage_output_path), mime="image/jpeg")
+                st.download_button(
+                    "Download Collage",
+                    data=file,
+                    file_name=os.path.basename(collage_output_path),
+                    mime="image/jpeg",
+                )
         except Exception as e:
             st.error(f"Error creating album collage: {e}")
+
 
 if __name__ == "__main__":
     main()
